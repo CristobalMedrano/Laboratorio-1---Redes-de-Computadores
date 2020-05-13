@@ -5,6 +5,7 @@
 
 # IMPORTS
 from scipy.io import wavfile
+from scipy import signal
 import numpy as np
 import matplotlib.pyplot as plt
 import os.path as path
@@ -53,35 +54,64 @@ def plot_audio_signal(fs, wave):
     plt.ylabel('Amplitude')
     plt.title('Wave in Time Domain')
 
+def plot_ifft_audio_signal(fs, wave):
+    time = get_time_audio_signal(fs, wave)
+    plt.figure(num="IFFT in Time Domain - "+filename[:-4], figsize=(8, 5))
+    plt.plot(time, wave, color="blue")
+    plt.xlim(time[0], time[-1])
+    plt.xlabel('Time (s)')
+    plt.ylabel('ifft(t)')
+    plt.title('IFFT in Time Domain')
+
 def get_time_audio_signal(fs, wave):
     return np.arange(wave.size)/float(fs)
 
 def plot_fft_audio_signal(fs, wave):
     fft_freq, fft_wave = get_fft_audio_signal(fs, wave)
     
-    plt.figure(num="FFT in Frequency Domain - "+filename[:-4], figsize=(8, 5))
-    plt.subplot(2,1,1)
+    plt.figure(num="Fourier Transforms in Frequency Domain - "+filename[:-4], figsize=(8, 5))
+    plt.subplot(3,1,1)
     plt.plot(fft_freq, fft_wave.real, label="Real part")
     plt.xlabel('Frequency (Hz)')
     plt.ylabel('F(w)')
     plt.legend(loc=1)
-    plt.title("FFT in Frequency Domain")
+    plt.title("Fourier Transforms in Frequency Domain")
 
-    plt.subplot(2,1,2)
+    plt.subplot(3,1,2)
     plt.plot(fft_freq, fft_wave.imag,label="Imaginary part")
     plt.legend(loc=1)
     plt.xlabel('Frequency (Hz)')
     plt.ylabel('F(w)')
     plt.xlabel("frequency (Hz)")
+
+    plt.subplot(3,1,3)
+    plt.plot(fft_freq, abs(fft_wave),label="|F(w)|")
+    plt.legend(loc=1)
+    plt.xlabel('Frequency (Hz)')
+    plt.ylabel('|F(w)|')
+    plt.xlabel("frequency (Hz)")
+
     plt.subplots_adjust(hspace=0.5)
     #wm = plt.get_current_fig_manager()
     #wm.window.state('zoomed')
-    plt.show()
 
 def get_fft_audio_signal(fs, wave):
     fft_freq = np.fft.fftfreq(wave.size, 1/fs)
     fft_wave = np.fft.fft(wave)
     return fft_freq, fft_wave
+
+def plot_iff_audio_signal(fs, wave):
+    time = get_time_audio_signal(fs, wave)
+    plt.figure(num="IFFT in Time Domain - "+filename[:-4], figsize=(8, 5))
+    plt.plot(time, wave, color="blue")
+    plt.xlim(time[0], time[-1])
+    plt.xlabel('Time (s)')
+    plt.ylabel('IFFT')
+    plt.title('IFFT in Time Domain')
+
+def get_ifft_audio_signal(fft_freq, fft_wave):
+    ifft_wave = np.fft.ifft(fft_wave, fft_freq.size)
+    return ifft_wave
 # MAIN
 def main():
     global filename
@@ -90,9 +120,19 @@ def main():
     #filename = input("Choose an audio file (.wav) to read: ")
     if is_valid_audio_file(filename):
         fs, wave = wavfile.read(filename)
-        plot_audio_signal(fs, wave)
-        plot_fft_audio_signal(fs, wave)
+        t = get_time_audio_signal(fs, wave)
+        #plot_audio_signal(fs, wave)
+        fft_freq, fft_wave = get_fft_audio_signal(fs, wave)
+        ifft_wave = get_ifft_audio_signal(fft_freq, fft_wave)
         
+        plt.specgram(x=wave, Fs=fs)
+        plt.ylabel('Frequency [Hz]')
+        plt.xlabel('Time [sec]')
+        #plot_fft_audio_signal(fs, wave)
+        #plot_ifft_audio_signal(fs, ifft_wave.real)
+        plot_fft_audio_signal(fs, wave)
+        plt.show()
+
     else:
         print("Audio file entered is not supported or doesn't exist.")
         return 0
