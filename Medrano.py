@@ -277,8 +277,8 @@ def get_band_pass_filter(fs, wave, low_cut_fs, high_cut_fs):
 def main():
     """ Main function of program """
     global filename
-    filename = "handel.wav"
-    #filename = input("Choose an audio file (.wav) to read: ")
+    #filename = "handel.wav"
+    filename = input("Choose an audio file (.wav) to read: ")
     if is_valid_audio_file(filename):
 
         # Getting the wave details
